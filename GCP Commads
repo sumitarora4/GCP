@@ -1,0 +1,102 @@
+sudo yum install java-1.8.0-openjdk
+
+which java
+
+ll /usr/bin/java
+ll /etc/alternatives/java
+
+//this will give java installation directory
+/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.212.b04-0.el7_6.x86_64/jre
+
+// set environment file for JAVA_HOME
+vi /etc/profile
+
+// Add below lines in profile file
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.212.b04-0.el7_6.x86_64/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export HOME=/home/are
+
+//load profile with updated variables
+source /etc/profile
+
+//to check env variable is set or not
+env
+
+
+// are user
+[root@spark-job-server-aps /]# useradd --system -m are && passwd -l are && echo "are ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && sed -i '/Defaults    requiretty/d' /etc/sudoers
+Locking password for user are.
+passwd: Success
+
+
+chown -R are:are /usr/local/
+chmod -R 755 /usr/local/
+
+=================== =========================================
+
+sudo yum install wget
+
+// install jdk 1.8.131
+wget -c --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.rpm 
+ 
+rpm -i jdk-8u131-linux-x64.rpm 
+rm jdk-8u131-linux-x64.rpm
+
+// are user add
+useradd --system -m are && passwd -l are && echo "are ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && sed -i '/Defaults    requiretty/d' /etc/sudoers
+
+// change ownership
+chown -R are:are /usr/local/
+chmod -R 755 /usr/local/
+
+// set environment file for JAVA_HOME and others
+vi /etc/profile
+
+// Add below lines in profile file
+export JAVA_HOME=/usr/java/default
+export PATH=$PATH:$JAVA_HOME/bin
+export HOME=/home/are
+
+//load profile with updated variables
+source /etc/profile
+
+//to check env variable is set or not
+env
+
+
+==================
+
+
+// to Open a SSH Tunnel for web UI of Spark and Hadoop
+gcloud compute ssh --zone=us-central1-b --ssh-flag="-D" --ssh-flag="10000" --ssh-flag="-N" "murray-small-test-cluster-m"
+
+
+// to open a secure web browser
+"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" "http://murray-small-test-cluster-m:8090" --proxy-server="socks5://localhost:10000"  --user-data-dir="tmp\murray-small-test-cluster-m"
+
+"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" "http://spark-jobserver:8090" --proxy-server="socks5://localhost:10000"  --user-data-dir="tmp\spark-jobserver"
+
+
+
+
+gcloud compute scp genome-analytics-21final.jar spark-jobserver:/tmp --zone us-central1-c
+
+
+gcloud compute scp spark-jobserver:/tmp/ ~/Documents/
+
+
+cmd='gcloud dataproc jobs submit spark --cluster murray-small-test-cluster --class $MAIN --driver-memory $JOBSERVER_MEMORY
+  --conf "spark.executor.extraJavaOptions=$LOGGING_OPTS"
+  --driver-java-options "$GC_OPTS $JAVA_OPTS $LOGGING_OPTS $CONFIG_OVERRIDES"
+  $@ $appdir/spark-job-server.jar $conffile'
+  
+  
+  gcloud dataproc jobs submit spark --cluster murray-small-test-cluster --region us-central1 --class spark.jobserver.JobServer --jars /usr/local/spark-jobserver/bin/spark-job-server.jar 1000
+  
+  gcloud dataproc jobs submit spark --cluster murray-small-test-cluster --region us-central1 --class spark.jobserver.JobServer --jars /usr/local/spark-jobserver/job-server-extras/target/scala-2.11/spark-job-server.jar
+  
+  gcloud alpha compute instances set-scopes spark-job-server-ubuntu --zone=us-central1-c --scopes=cloud-platform
+  
+========
+
+gsutil ls gs://aps-spark-test-999/data
